@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+
+        async function main() {
+            // memory stuff
+            const memoryDescriptor = { initial: 3, maximum: 3, shared: false };
+            const memory = new WebAssembly.Memory(memoryDescriptor);
+            const arr = new Uint8Array(memory.buffer);
+            const imports = { env: { memory } };
+
+            // load the wasm module
+            const wasmSource = await fetch('./main.wasm');
+            const wasmModule = await WebAssembly.instantiateStreaming(wasmSource, imports);
+
+            // populate the shared array
+            console.log(arr.length);
+            for (let i = 0; i < 20; i++) {
+                arr[i] = i+1;
+            }
+
+            const exports = wasmModule.instance.exports;
+            exports.reverse(0, 20);
+
+            console.log(arr);
+        }
+        main();
+    </script>
+</body>
+
+</html>
